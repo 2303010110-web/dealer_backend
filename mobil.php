@@ -1,7 +1,10 @@
 <?php
 require_once 'includes/config.php';
 
-// Filter & Search
+// Helper sanitize/rupiah sudah ada di includes/config.php.
+
+
+// ===== Filter & Search =====
 $q        = sanitize($_GET['q'] ?? '');
 $tipe     = sanitize($_GET['tipe'] ?? '');
 $transmisi = sanitize($_GET['transmisi'] ?? '');
@@ -53,7 +56,7 @@ $orderSQL = match($sort) {
 $stmtCount = $conn->prepare("SELECT COUNT(*) as total FROM mobil WHERE $whereSQL");
 if ($types) $stmtCount->bind_param($types, ...$params);
 $stmtCount->execute();
-$total_rows = $stmtCount->get_result()->fetch_assoc()['total'];
+$total_rows = $stmtCount->get_result()->fetch_assoc()['total'] ?? 0;
 $total_pages = ceil($total_rows / $per_page);
 
 // Fetch mobil
@@ -66,33 +69,32 @@ $mobils = $stmtMobil->get_result();
 
 // Ambil semua tipe unik
 $tipeList = $conn->query("SELECT DISTINCT tipe FROM mobil WHERE status='aktif' ORDER BY tipe");
-<<<<<<< HEAD
-=======
+if (!$tipeList) {
+    $tipeList = new stdClass(); // fallback
+    $tipeList->num_rows = 0;
+}
 
-// Fungsi untuk mendapatkan path gambar yang benar
+// ===== Fungsi untuk mendapatkan path gambar yang benar =====
 function getGambarPath($gambar) {
     if (empty($gambar)) {
         return '';
     }
     
-    // Path yang akan dicek
     $pathsToCheck = [
-        $gambar, // Path langsung dari database
-        'uploads/mobil/' . basename($gambar), // Uploads folder
-        '../uploads/mobil/' . basename($gambar), // Dari folder atas
-        '../' . $gambar, // Dari folder atas dengan path database
-        'assets/images/' . basename($gambar), // Assets folder
-        'images/' . basename($gambar), // Images folder
+        $gambar,
+        'uploads/mobil/' . basename($gambar),
+        '../uploads/mobil/' . basename($gambar),
+        '../' . $gambar,
+        'assets/images/' . basename($gambar),
+        'images/' . basename($gambar),
     ];
     
-    // Cek setiap kemungkinan path
     foreach ($pathsToCheck as $path) {
         if (!empty($path) && file_exists(__DIR__ . '/' . $path)) {
             return $path;
         }
     }
     
-    // Jika path dimulai dengan 'uploads/' dan tidak ditemukan, coba dengan '../'
     if (strpos($gambar, 'uploads/') === 0) {
         $altPath = '../' . $gambar;
         if (file_exists(__DIR__ . '/' . $altPath)) {
@@ -100,17 +102,8 @@ function getGambarPath($gambar) {
         }
     }
     
-    // Jika tidak ditemukan sama sekali, return path asli
-    return $gambar;
+    return $gambar; // fallback
 }
-
-// Fungsi untuk format rupiah jika belum ada
-if (!function_exists('rupiah')) {
-    function rupiah($angka) {
-        return 'Rp ' . number_format($angka, 0, ',', '.');
-    }
-}
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -141,20 +134,12 @@ if (!function_exists('rupiah')) {
     .filter-group select,.filter-group input[type=number]{width:100%;padding:10px 14px;border:1.5px solid var(--lighter);border-radius:12px;font-size:14px;color:var(--dark);font-family:'Poppins',sans-serif;background:var(--lighter);transition:.3s}
     .filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--primary);background:white}
     .filter-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-<<<<<<< HEAD
-    .filter-chip{padding:6px 14px;border-radius:50px;border:1.5px solid var(--lighter);background:white;font-size:12px;color:var(--gray);cursor:pointer;transition:.25s;font-family:'Poppins',sans-serif}
-=======
     .filter-chip{padding:6px 14px;border-radius:50px;border:1.5px solid var(--lighter);background:white;font-size:12px;color:var(--gray);cursor:pointer;transition:.25s;font-family:'Poppins',sans-serif;text-decoration:none;display:inline-block}
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
     .filter-chip.active,.filter-chip:hover{background:var(--primary);border-color:var(--primary);color:white}
     .price-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .filter-btn{width:100%;padding:12px;background:linear-gradient(135deg,#dc2626,#ef4444);color:white;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;font-family:'Poppins',sans-serif}
     .filter-btn:hover{opacity:.88;transform:translateY(-1px)}
-<<<<<<< HEAD
-    .filter-reset{width:100%;padding:10px;background:var(--lighter);color:var(--gray);border:none;border-radius:14px;font-size:13px;cursor:pointer;transition:.3s;margin-top:10px;font-family:'Poppins',sans-serif}
-=======
     .filter-reset{width:100%;padding:10px;background:var(--lighter);color:var(--gray);border:none;border-radius:14px;font-size:13px;cursor:pointer;transition:.3s;margin-top:10px;font-family:'Poppins',sans-serif;text-align:center;display:block;text-decoration:none}
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
     .filter-reset:hover{background:#e5e7eb}
     .mobil-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:14px}
     .result-info{font-size:14px;color:var(--gray)}
@@ -162,8 +147,6 @@ if (!function_exists('rupiah')) {
     .sort-select{padding:10px 16px;border:1.5px solid var(--lighter);border-radius:12px;font-size:14px;font-family:'Poppins',sans-serif;color:var(--dark);background:white;cursor:pointer}
     .sort-select:focus{outline:none;border-color:var(--primary)}
     .mobil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-<<<<<<< HEAD
-=======
     
     /* Car Card Styles */
     .car-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08);transition:all .35s;position:relative}
@@ -185,7 +168,11 @@ if (!function_exists('rupiah')) {
     .car-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1.5px solid var(--lighter)}
     .car-price{font-size:18px;font-weight:800;color:var(--primary)}
     
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:'Poppins',sans-serif}
+    .btn-primary{background:linear-gradient(135deg,#dc2626,#ef4444);color:white}
+    .btn-primary:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 8px 24px rgba(220,38,38,.3)}
+    .btn-sm{padding:6px 16px;font-size:12px}
+    
     .no-result{text-align:center;padding:70px 30px;background:white;border-radius:24px;box-shadow:var(--shadow)}
     .no-result i{font-size:60px;color:#e5e7eb;margin-bottom:20px;display:block}
     .no-result h3{font-size:20px;color:var(--dark);margin-bottom:10px}
@@ -196,15 +183,7 @@ if (!function_exists('rupiah')) {
     .pagination a:hover{background:var(--primary);color:white}
     .pagination .active{background:linear-gradient(135deg,#dc2626,#ef4444);color:white;font-weight:700}
     .pagination .disabled{background:#f3f4f6;color:#d1d5db;cursor:not-allowed}
-<<<<<<< HEAD
-=======
     
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:'Poppins',sans-serif}
-    .btn-primary{background:linear-gradient(135deg,#dc2626,#ef4444);color:white}
-    .btn-primary:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 8px 24px rgba(220,38,38,.3)}
-    .btn-sm{padding:6px 16px;font-size:12px}
-    
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
     @media(max-width:900px){.mobil-layout{grid-template-columns:1fr}.filter-sidebar{position:static}.mobil-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:600px){.mobil-grid{grid-template-columns:1fr}}
   </style>
@@ -242,19 +221,20 @@ if (!function_exists('rupiah')) {
             <label><i class="fa-solid fa-car"></i> Tipe Kendaraan</label>
             <div class="filter-chips">
               <a href="mobil.php" class="filter-chip <?= !$tipe ? 'active' : '' ?>">Semua</a>
-<<<<<<< HEAD
-              <?php while ($t = $tipeList->fetch_assoc()): ?>
-=======
               <?php 
-              $tipeList->data_seek(0);
-              while ($t = $tipeList->fetch_assoc()): 
+              if ($tipeList && $tipeList->num_rows > 0) {
+                  // Reset pointer if needed, but we haven't used it before
+                  $tipeList->data_seek(0);
+                  while ($t = $tipeList->fetch_assoc()): 
               ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
               <a href="?tipe=<?= urlencode($t['tipe']) ?><?= $q ? '&q='.urlencode($q) : '' ?>"
                  class="filter-chip <?= $tipe === $t['tipe'] ? 'active' : '' ?>">
                 <?= sanitize($t['tipe']) ?>
               </a>
-              <?php endwhile; ?>
+              <?php 
+                  endwhile;
+              } 
+              ?>
             </div>
           </div>
 
@@ -278,11 +258,7 @@ if (!function_exists('rupiah')) {
 
           <input type="hidden" name="sort" id="sortHidden" value="<?= $sort ?>">
           <button type="submit" class="filter-btn"><i class="fa-solid fa-filter"></i> Terapkan Filter</button>
-<<<<<<< HEAD
-          <a href="mobil.php"><button type="button" class="filter-reset"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button></a>
-=======
           <a href="mobil.php" class="filter-reset"><i class="fa-solid fa-rotate-left"></i> Reset Filter</a>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
         </form>
       </aside>
 
@@ -303,31 +279,20 @@ if (!function_exists('rupiah')) {
 
         <?php if ($mobils->num_rows > 0): ?>
         <div class="mobil-grid">
-<<<<<<< HEAD
-          <?php while ($m = $mobils->fetch_assoc()): ?>
-=======
           <?php while ($m = $mobils->fetch_assoc()): 
-            // Dapatkan path gambar yang benar
             $gambarPath = getGambarPath($m['gambar']);
-            
-            // Cek apakah file benar-benar ada
             $fileExists = !empty($gambarPath) && file_exists(__DIR__ . '/' . $gambarPath);
           ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
           <div class="car-card animate-on-scroll">
-            <?php if ($m['badge']): ?>
+            <?php if (!empty($m['badge'])): ?>
             <div class="car-badge"><?= sanitize($m['badge']) ?></div>
             <?php endif; ?>
             <div class="car-img">
-<<<<<<< HEAD
-              <img src="<?= imgUrl($m['gambar']) ?>" alt="<?= sanitize($m['nama_mobil']) ?>" loading="lazy">
-=======
               <?php if ($fileExists): ?>
                 <img src="<?= $gambarPath ?>" alt="<?= sanitize($m['nama_mobil']) ?>" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22><rect fill=%22%23f1f5f9%22 width=%22400%22 height=%22200%22/><text x=%22120%22 y=%22110%22 font-size=%2220%22 fill=%22%239ca3af%22 font-family=%22Poppins%22>No Image</text></svg>'">
               <?php else: ?>
                 <img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22><rect fill=%22%23f1f5f9%22 width=%22400%22 height=%22200%22/><text x=%22120%22 y=%22110%22 font-size=%2220%22 fill=%22%239ca3af%22 font-family=%22Poppins%22>No Image</text></svg>" alt="No Image">
               <?php endif; ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
               <div class="car-overlay">
                 <a href="detail-mobil.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm">
                   <i class="fa-solid fa-eye"></i> Lihat Detail
@@ -336,17 +301,17 @@ if (!function_exists('rupiah')) {
             </div>
             <div class="car-info">
               <div class="car-meta">
-                <span class="car-type"><?= sanitize($m['tipe']) ?></span>
-                <span class="car-year"><?= $m['tahun'] ?></span>
+                <span class="car-type"><?= sanitize($m['tipe'] ?? '') ?></span>
+                <span class="car-year"><?= $m['tahun'] ?? '' ?></span>
               </div>
               <h3 class="car-name"><?= sanitize($m['nama_mobil']) ?></h3>
               <div class="car-specs">
-                <span><i class="fa-solid fa-gears"></i> <?= sanitize($m['transmisi']) ?></span>
-                <span><i class="fa-solid fa-gas-pump"></i> <?= sanitize($m['bahan_bakar']) ?></span>
-                <span><i class="fa-solid fa-layer-group"></i> Stok: <?= $m['stok'] ?></span>
+                <span><i class="fa-solid fa-gears"></i> <?= sanitize($m['transmisi'] ?? '') ?></span>
+                <span><i class="fa-solid fa-gas-pump"></i> <?= sanitize($m['bahan_bakar'] ?? '') ?></span>
+                <span><i class="fa-solid fa-layer-group"></i> Stok: <?= $m['stok'] ?? 0 ?></span>
               </div>
               <div class="car-footer">
-                <div class="car-price"><?= rupiah($m['harga']) ?></div>
+                <div class="car-price"><?= rupiah($m['harga'] ?? 0) ?></div>
                 <a href="booking.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm">
                   <i class="fa-solid fa-calendar-check"></i> Booking
                 </a>
@@ -402,11 +367,6 @@ function changeSort(v) {
   document.getElementById('sortHidden').value = v;
   document.getElementById('filterForm').submit();
 }
-<<<<<<< HEAD
-</script>
-</body>
-</html>
-=======
 
 // Animasi scroll
 document.addEventListener('DOMContentLoaded', function() {
@@ -429,4 +389,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
