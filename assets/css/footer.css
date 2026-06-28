@@ -1,0 +1,233 @@
+/* ============================================================
+   DEALER MOBIL — footer.css
+   ============================================================ */
+
+.footer {
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  color: white;
+  margin-top: 80px;
+}
+
+/* ---- TOP ---- */
+.footer-top {
+  padding: 70px 0 50px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.6fr;
+  gap: 40px;
+}
+
+/* ---- LOGO ---- */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.footer-logo-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 22px;
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.3);
+  flex-shrink: 0;
+}
+
+.footer-logo-text h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+}
+
+.footer-logo-text h2 span {
+  color: #f87171;
+}
+
+.footer-logo-text p {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.footer-desc {
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-bottom: 24px;
+}
+
+/* ---- SOCIAL ---- */
+.footer-social {
+  display: flex;
+  gap: 10px;
+}
+
+.footer-social a {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-social a:hover {
+  background: #dc2626;
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.3);
+}
+
+/* ---- COLUMN TITLES ---- */
+.footer-col h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.footer-col h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 3px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+/* ---- LINKS ---- */
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.footer-col ul li a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-col ul li a::before {
+  content: '›';
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 700;
+  transition: 0.3s ease;
+}
+
+.footer-col ul li a:hover {
+  color: #f87171;
+  padding-left: 5px;
+}
+
+/* ---- CONTACT ---- */
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 16px;
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.contact-item .ci-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ---- BOTTOM ---- */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 22px 0;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.footer-bottom p {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.footer-bottom p span {
+  color: #f87171;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 13px;
+  transition: 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #f87171;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 1100px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-top {
+    padding: 50px 0 30px;
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-links {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
