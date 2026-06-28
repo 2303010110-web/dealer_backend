@@ -3,85 +3,6 @@ require_once 'includes/config.php';
 
 // Ambil mobil featured
 $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'aktif' LIMIT 6");
-
-<<<<<<< HEAD
-// Ambil testimonial aktif
-$testimoni = $conn->query("SELECT * FROM testimonial WHERE status = 'aktif' ORDER BY id DESC LIMIT 3");
-
-// Stats
-$total_mobil  = $conn->query("SELECT COUNT(*) as c FROM mobil WHERE status='aktif'")->fetch_assoc()['c'];
-$total_booking = $conn->query("SELECT COUNT(*) as c FROM booking")->fetch_assoc()['c'];
-=======
-// Ambil testimonial aktif - perbaiki query
-$testimoni = $conn->query("SELECT * FROM testimonial WHERE status = 'approved' ORDER BY id DESC LIMIT 3");
-
-// Jika tabel testimonial belum ada atau kolom berbeda, gunakan data dummy
-if (!$testimoni || $testimoni->num_rows == 0) {
-    // Data dummy jika belum ada testimonial
-    $testimoni = [
-        ['nama' => 'Budi Santoso', 'teks' => 'Pelayanan sangat memuaskan, mobil Mitsubishi Xpander yang saya beli berkualitas dan proses kreditnya sangat mudah.', 'rating' => 5, 'kota' => 'Jakarta'],
-        ['nama' => 'Siti Rahayu', 'teks' => 'Dealer Mitsubishi terbaik di kota ini. Staff sangat ramah dan profesional. Pajero Sport saya terawat dengan baik.', 'rating' => 5, 'kota' => 'Surabaya'],
-        ['nama' => 'Andi Wijaya', 'teks' => 'Harga kompetitif dan pelayanan after-sales yang luar biasa. Sangat merekomendasikan dealer ini untuk pembelian Mitsubishi.', 'rating' => 4, 'kota' => 'Bandung']
-    ];
-} else {
-    $testimoniData = [];
-    while ($row = $testimoni->fetch_assoc()) {
-        $testimoniData[] = $row;
-    }
-    $testimoni = $testimoniData;
-}
-
-// Stats
-$total_mobil  = $conn->query("SELECT COUNT(*) as c FROM mobil WHERE status='aktif'")->fetch_assoc()['c'];
-
-// Cek tabel booking ada atau tidak
-$total_booking = 0;
-$bookingCheck = $conn->query("SHOW TABLES LIKE 'booking'");
-if ($bookingCheck->num_rows > 0) {
-    $bookingResult = $conn->query("SELECT COUNT(*) as c FROM booking");
-    if ($bookingResult) {
-        $total_booking = $bookingResult->fetch_assoc()['c'];
-    }
-}
-
-// Fungsi untuk mendapatkan path gambar yang benar
-function getGambarPath($gambar) {
-    if (empty($gambar)) {
-        return '';
-    }
-    
-    // Jika gambar sudah memiliki path lengkap
-    if (strpos($gambar, 'http') === 0) {
-        return $gambar;
-    }
-    
-    // Cek berbagai kemungkinan path
-    $pathsToCheck = [
-        $gambar,
-        'uploads/mobil/' . basename($gambar),
-        '../uploads/mobil/' . basename($gambar),
-        'assets/images/' . basename($gambar),
-    ];
-    
-    foreach ($pathsToCheck as $path) {
-        if (!empty($path) && file_exists(__DIR__ . '/' . $path)) {
-            return $path;
-        }
-    }
-    
-    // Jika tidak ditemukan, return path dengan uploads
-    if (strpos($gambar, 'uploads/') === false) {
-        return 'uploads/mobil/' . basename($gambar);
-    }
-    
-    return $gambar;
-}
-
-// Jika featured tidak ada hasil, ambil semua mobil aktif
-if (!$featured || $featured->num_rows == 0) {
-    $featured = $conn->query("SELECT * FROM mobil WHERE status='aktif' LIMIT 6");
-}
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -150,41 +71,7 @@ if (!$featured || $featured->num_rows == 0) {
     .cta-buttons{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
     .view-all-wrap{text-align:center;margin-top:50px}
     .mobil-section{background:var(--lighter)}
-<<<<<<< HEAD
-    @media(max-width:768px){.hero-grid{grid-template-columns:1fr}.hero-card{display:none}.hero-content h1{font-size:36px}.stats-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:1fr}.testimonial-grid{grid-template-columns:1fr}}
-=======
-    .grid-auto{display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
-    
-    /* Car Card Styles */
-    .car-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08);transition:all .35s;position:relative}
-    .car-card:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
-    .car-img{position:relative;overflow:hidden;height:200px;background:#f1f5f9}
-    .car-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
-    .car-card:hover .car-img img{transform:scale(1.05)}
-    .car-badge{position:absolute;top:14px;left:14px;background:linear-gradient(135deg,#dc2626,#ef4444);color:white;padding:4px 14px;border-radius:50px;font-size:11px;font-weight:600;z-index:2;text-transform:uppercase;letter-spacing:.5px}
-    .car-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .35s}
-    .car-card:hover .car-overlay{opacity:1}
-    .car-info{padding:18px 20px 20px}
-    .car-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .car-type{font-size:12px;font-weight:600;color:var(--primary);background:#fef2f2;padding:2px 12px;border-radius:50px}
-    .car-year{font-size:12px;color:var(--gray)}
-    .car-name{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:10px;line-height:1.3}
-    .car-specs{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
-    .car-specs span{font-size:12px;color:var(--gray);display:flex;align-items:center;gap:5px}
-    .car-specs span i{color:var(--primary);font-size:11px}
-    .car-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1.5px solid var(--lighter)}
-    .car-price{font-size:18px;font-weight:800;color:var(--primary)}
-    
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:'Poppins',sans-serif}
-    .btn-primary{background:linear-gradient(135deg,#dc2626,#ef4444);color:white}
-    .btn-primary:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 8px 24px rgba(220,38,38,.3)}
-    .btn-ghost{background:transparent;color:white;border:2px solid rgba(255,255,255,.3)}
-    .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:white}
-    .btn-sm{padding:6px 16px;font-size:12px}
-    .btn-lg{padding:14px 32px;font-size:16px}
-    
-    @media(max-width:768px){.hero-grid{grid-template-columns:1fr}.hero-card{display:none}.hero-content h1{font-size:36px}.stats-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:1fr}.testimonial-grid{grid-template-columns:1fr}.grid-auto{grid-template-columns:1fr}}
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+
   </style>
 </head>
 <body>
@@ -217,9 +104,9 @@ if (!$featured || $featured->num_rows == 0) {
       </div>
       <div class="hero-card animate-on-scroll">
         <div class="hero-dots"></div>
-<<<<<<< HEAD
+
         <img src="https://storage.googleapis.com/gcmkscsp001/public/media-assets/483f91da-09c5-4fc8-9e8f-6de540f6949d/conversions/26my-xp-exterior-front-left-rhd-u33-f-optimized-optimized.webp?GoogleAccessId=bsidevops%40gp-prod-mmksi-web-01.iam.gserviceaccount.com&Expires=1782809183&Signature=FHLJ1boFzVUW5HrLZk1%2Fnr7gG7gcfhApECnlNMdRFo%2FhcQNyQjkifpZgMoo3x6MZKZbqWUN0ZCWt%2BCUj5VURcEp1YX%2BFHNmeYeGc6l1sTlc0YtYcrPqkkBnTYh2GOJ4ITOJ6N6whGFUtoHMJwkdTUOhrc%2B0GHuRrLz25P%2BEtUO43XZLWF30TRikSK6W6ZeHMQQeh6xHu9eT4MOODRV%2FmrmGuCTvt0zSsDUWv1%2Fapki3VuynTDriQpEYCJRFKZhSiBE%2FBs3RXUIMCxFeb%2BMhU44dVc2GAtRHbQpx0xY1GaHttSn%2FLtO%2FPgy4fSOwcwtQ2a%2BuCIoQTSrpF7NQBcSSP0A%3D%3D" alt="Mitsubishi Xpander">
-=======
+
         <?php
         // Ambil satu mobil untuk hero card
         $heroMobil = $conn->query("SELECT * FROM mobil WHERE status='aktif' ORDER BY id DESC LIMIT 1");
@@ -231,22 +118,14 @@ if (!$featured || $featured->num_rows == 0) {
         <h3><?= sanitize($heroData['nama_mobil']) ?></h3>
         <p><?= substr(sanitize($heroData['deskripsi']), 0, 100) ?>...</p>
         <div class="hero-info">
-          <div class="hero-price"><i class="fa-solid fa-tag"></i> <?= rupiah($heroData['harga']) ?></div>
-          <a href="detail-mobil.php?id=<?= $heroData['id'] ?>" class="btn btn-primary btn-sm">Detail</a>
-        </div>
-        <?php } else { ?>
-        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80" alt="Mitsubishi Xpander">
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
         <h3>Mitsubishi Xpander 2024</h3>
         <p>MPV terlaris dengan desain sporty, mesin MIVEC bertenaga, dan kabin lega untuk keluarga aktif Anda.</p>
         <div class="hero-info">
           <div class="hero-price"><i class="fa-solid fa-tag"></i> Mulai 298 Juta</div>
           <a href="mobil.php" class="btn btn-primary btn-sm">Explore</a>
         </div>
-<<<<<<< HEAD
-=======
+
         <?php } ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
       </div>
     </div>
   </div>
@@ -289,78 +168,7 @@ if (!$featured || $featured->num_rows == 0) {
       <p>Pilihan kendaraan Mitsubishi berkualitas terbaik dengan harga bersaing, performa maksimal, dan kondisi prima siap pakai.</p>
     </div>
     <div class="grid-auto">
-<<<<<<< HEAD
-      <?php while ($m = $featured->fetch_assoc()): ?>
-      <div class="car-card animate-on-scroll">
-        <?php if ($m['badge']): ?>
-        <div class="car-badge"><?= sanitize($m['badge']) ?></div>
-        <?php endif; ?>
-        <div class="car-img">
-          <img src="<?= imgUrl($m['gambar']) ?>" alt="<?= sanitize($m['nama_mobil']) ?>" loading="lazy">
-          <div class="car-overlay">
-            <a href="detail-mobil.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm"><i class="fa-solid fa-eye"></i> Lihat Detail</a>
-          </div>
-        </div>
-        <div class="car-info">
-          <div class="car-meta">
-            <span class="car-type"><?= sanitize($m['tipe']) ?></span>
-            <span class="car-year"><?= $m['tahun'] ?></span>
-          </div>
-          <h3 class="car-name"><?= sanitize($m['nama_mobil']) ?></h3>
-          <div class="car-specs">
-            <span><i class="fa-solid fa-gears"></i> <?= sanitize($m['transmisi']) ?></span>
-            <span><i class="fa-solid fa-gas-pump"></i> <?= sanitize($m['bahan_bakar']) ?></span>
-            <span><i class="fa-solid fa-palette"></i> <?= sanitize($m['warna']) ?></span>
-          </div>
-          <div class="car-footer">
-            <div class="car-price"><?= rupiah($m['harga']) ?></div>
-            <a href="booking.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm"><i class="fa-solid fa-calendar-check"></i> Booking</a>
-          </div>
-        </div>
-      </div>
-      <?php endwhile; ?>
-=======
-      <?php if ($featured && $featured->num_rows > 0): ?>
-        <?php while ($m = $featured->fetch_assoc()): ?>
-        <div class="car-card animate-on-scroll">
-          <?php if ($m['badge']): ?>
-          <div class="car-badge"><?= sanitize($m['badge']) ?></div>
-          <?php endif; ?>
-          <div class="car-img">
-            <?php 
-            $gambarPath = getGambarPath($m['gambar']);
-            ?>
-            <img src="<?= $gambarPath ?>" alt="<?= sanitize($m['nama_mobil']) ?>" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22><rect fill=%22%23f1f5f9%22 width=%22400%22 height=%22200%22/><text x=%22120%22 y=%22110%22 font-size=%2220%22 fill=%22%239ca3af%22 font-family=%22Poppins%22>No Image</text></svg>'">
-            <div class="car-overlay">
-              <a href="detail-mobil.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm"><i class="fa-solid fa-eye"></i> Lihat Detail</a>
-            </div>
-          </div>
-          <div class="car-info">
-            <div class="car-meta">
-              <span class="car-type"><?= sanitize($m['tipe']) ?></span>
-              <span class="car-year"><?= $m['tahun'] ?></span>
-            </div>
-            <h3 class="car-name"><?= sanitize($m['nama_mobil']) ?></h3>
-            <div class="car-specs">
-              <span><i class="fa-solid fa-gears"></i> <?= sanitize($m['transmisi']) ?></span>
-              <span><i class="fa-solid fa-gas-pump"></i> <?= sanitize($m['bahan_bakar']) ?></span>
-              <span><i class="fa-solid fa-palette"></i> <?= sanitize($m['warna']) ?></span>
-            </div>
-            <div class="car-footer">
-              <div class="car-price"><?= rupiah($m['harga']) ?></div>
-              <a href="booking.php?id=<?= $m['id'] ?>" class="btn btn-primary btn-sm"><i class="fa-solid fa-calendar-check"></i> Booking</a>
-            </div>
-          </div>
-        </div>
-        <?php endwhile; ?>
-      <?php else: ?>
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray)">
-          <i class="fa-solid fa-car" style="font-size:48px;display:block;margin-bottom:16px;color:#d1d5db"></i>
-          <p>Belum ada data mobil featured. Silahkan tambahkan data mobil di admin panel.</p>
-          <a href="admin/mobil.php" class="btn btn-primary" style="margin-top:16px;display:inline-flex">Kelola Data Mobil</a>
-        </div>
-      <?php endif; ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+
     </div>
     <div class="view-all-wrap animate-on-scroll">
       <a href="mobil.php" class="btn btn-primary btn-lg"><i class="fa-solid fa-car-side"></i> Lihat Semua Koleksi</a>
@@ -422,23 +230,7 @@ if (!$featured || $featured->num_rows == 0) {
       <p>Ribuan pelanggan puas telah mempercayakan kebutuhan Mitsubishinya kepada kami.</p>
     </div>
     <div class="testimonial-grid">
-<<<<<<< HEAD
-      <?php while ($t = $testimoni->fetch_assoc()): ?>
-      <div class="testimonial-card animate-on-scroll">
-        <div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div>
-        <div class="stars"><?= str_repeat('<i class="fa-solid fa-star"></i>', min(5, (int)$t['rating'])) ?></div>
-        <p>"<?= sanitize($t['teks']) ?>"</p>
-=======
-      <?php 
-      $testimoniDisplay = isset($testimoniData) ? $testimoniData : $testimoni;
-      if (is_array($testimoniDisplay) && count($testimoniDisplay) > 0): 
-        foreach ($testimoniDisplay as $t): 
-      ?>
-      <div class="testimonial-card animate-on-scroll">
-        <div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div>
-        <div class="stars"><?= str_repeat('<i class="fa-solid fa-star"></i>', min(5, (int)($t['rating'] ?? 5))) ?></div>
-        <p>"<?= sanitize($t['teks'] ?? $t['komentar'] ?? 'Pelayanan sangat memuaskan, mobil berkualitas dan prosesnya mudah.') ?>"</p>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+
         <div class="testimonial-author">
           <div class="author-avatar"><?= strtoupper(substr($t['nama'], 0, 1)) ?></div>
           <div class="author-info">
@@ -449,17 +241,7 @@ if (!$featured || $featured->num_rows == 0) {
         </div>
       </div>
       <?php endwhile; ?>
-=======
-            <span><i class="fa-solid fa-location-dot"></i> <?= sanitize($t['kota'] ?? 'Indonesia') ?></span>
-          </div>
-        </div>
-      </div>
-      <?php endforeach; else: ?>
-      <div class="testimonial-card animate-on-scroll" style="grid-column:1/-1;text-align:center;padding:40px">
-        <p style="font-style:normal;color:#9ca3af">Belum ada testimonial. Jadilah yang pertama memberikan testimoni!</p>
-      </div>
-      <?php endif; ?>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+
     </div>
   </div>
 </section>
@@ -480,10 +262,6 @@ if (!$featured || $featured->num_rows == 0) {
 
 <?php include 'includes/footer.php'; ?>
 <script src="assets/js/main.js"></script>
-<<<<<<< HEAD
-</body>
-</html>
-=======
 <script>
 // Counter animation
 document.addEventListener('DOMContentLoaded', function() {
@@ -520,4 +298,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
->>>>>>> 20c1e223d846345e893658d18c2bd0949006bcee
+
