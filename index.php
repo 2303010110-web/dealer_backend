@@ -1,8 +1,55 @@
 <?php
 require_once 'includes/config.php';
 
-// Ambil mobil featured
+// ===== Helper Functions (jika belum ada di config) =====
+if (!function_exists('sanitize')) {
+    function sanitize($str) {
+        return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+    }
+}
+if (!function_exists('getGambarPath')) {
+    function getGambarPath($gambar) {
+        // Sesuaikan dengan logika path gambar Anda
+        if (empty($gambar)) return 'assets/images/default-car.jpg';
+        // Jika $gambar adalah path relatif, tambahkan prefix jika perlu
+        return $gambar;
+    }
+}
+
+// ===== Ambil data =====
+// Total mobil aktif untuk statistik
+$totalQuery = $conn->query("SELECT COUNT(*) AS total FROM mobil WHERE status = 'aktif'");
+$total_mobil = $totalQuery ? $totalQuery->fetch_assoc()['total'] : 0;
+
+// Featured mobil
 $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'aktif' LIMIT 6");
+if (!$featured) $featured = false;
+
+// Satu mobil untuk hero (terbaru)
+$heroMobil = $conn->query("SELECT * FROM mobil WHERE status='aktif' ORDER BY id DESC LIMIT 1");
+$heroData = ($heroMobil && $heroMobil->num_rows > 0) ? $heroMobil->fetch_assoc() : null;
+
+// Testimonial (dummy, sesuaikan dengan query jika ada tabel testimonial)
+$testimonials = [
+    [
+        'nama' => 'Budi Santoso',
+        'kota' => 'Jakarta',
+        'isi'  => 'Pelayanan sangat memuaskan, proses kredit cepat dan mudah. Mobil Mitsubishi Xpander baru saya langsung terasa nyaman.',
+        'rating' => 5
+    ],
+    [
+        'nama' => 'Siti Rahayu',
+        'kota' => 'Surabaya',
+        'isi'  => 'Dealer ini sangat profesional, saya dapat harga terbaik dan free servis 3 tahun. Sangat recomended!',
+        'rating' => 5
+    ],
+    [
+        'nama' => 'Andi Wijaya',
+        'kota' => 'Bandung',
+        'isi'  => 'Pilihan mobil lengkap, staf ramah dan tidak memaksa. Saya puas dengan Mitsubishi Pajero Sport yang saya beli.',
+        'rating' => 4
+    ]
+];
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -19,6 +66,7 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
   <link rel="stylesheet" href="assets/css/footer.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
   <style>
+    /* (Gaya yang sama seperti sebelumnya, tidak diubah) */
     .hero{position:relative;min-height:96vh;background:linear-gradient(rgba(17,24,39,.84),rgba(17,24,39,.80)),url("https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=1400&q=80");background-size:cover;background-position:center;display:flex;align-items:center;overflow:hidden;padding:100px 0 60px}
     .hero::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(rgba(220,38,38,.3),transparent 70%);top:-150px;right:-150px;pointer-events:none}
     .hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:50px;align-items:center;width:100%}
@@ -71,7 +119,6 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
     .cta-buttons{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
     .view-all-wrap{text-align:center;margin-top:50px}
     .mobil-section{background:var(--lighter)}
-
   </style>
 </head>
 <body>
@@ -102,30 +149,34 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
           <a href="#mobil-section" class="btn btn-ghost btn-lg"><i class="fa-solid fa-arrow-down"></i> Jelajahi Sekarang</a>
         </div>
       </div>
+
+      <!-- Hero Card - menampilkan satu mobil terbaru -->
       <div class="hero-card animate-on-scroll">
         <div class="hero-dots"></div>
-
-        <img src="https://storage.googleapis.com/gcmkscsp001/public/media-assets/483f91da-09c5-4fc8-9e8f-6de540f6949d/conversions/26my-xp-exterior-front-left-rhd-u33-f-optimized-optimized.webp?GoogleAccessId=bsidevops%40gp-prod-mmksi-web-01.iam.gserviceaccount.com&Expires=1782809183&Signature=FHLJ1boFzVUW5HrLZk1%2Fnr7gG7gcfhApECnlNMdRFo%2FhcQNyQjkifpZgMoo3x6MZKZbqWUN0ZCWt%2BCUj5VURcEp1YX%2BFHNmeYeGc6l1sTlc0YtYcrPqkkBnTYh2GOJ4ITOJ6N6whGFUtoHMJwkdTUOhrc%2B0GHuRrLz25P%2BEtUO43XZLWF30TRikSK6W6ZeHMQQeh6xHu9eT4MOODRV%2FmrmGuCTvt0zSsDUWv1%2Fapki3VuynTDriQpEYCJRFKZhSiBE%2FBs3RXUIMCxFeb%2BMhU44dVc2GAtRHbQpx0xY1GaHttSn%2FLtO%2FPgy4fSOwcwtQ2a%2BuCIoQTSrpF7NQBcSSP0A%3D%3D" alt="Mitsubishi Xpander">
-
-        <?php
-        // Ambil satu mobil untuk hero card
-        $heroMobil = $conn->query("SELECT * FROM mobil WHERE status='aktif' ORDER BY id DESC LIMIT 1");
-        if ($heroMobil && $heroMobil->num_rows > 0) {
-            $heroData = $heroMobil->fetch_assoc();
-            $heroGambar = getGambarPath($heroData['gambar']);
-        ?>
-        <img src="<?= $heroGambar ?>" alt="<?= sanitize($heroData['nama_mobil']) ?>" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22200%22><rect fill=%22%231f2937%22 width=%22600%22 height=%22200%22/><text x=%22200%22 y=%22110%22 font-size=%2220%22 fill=%22%239ca3af%22 font-family=%22Poppins%22>No Image</text></svg>'">
-        <h3><?= sanitize($heroData['nama_mobil']) ?></h3>
-        <p><?= substr(sanitize($heroData['deskripsi']), 0, 100) ?>...</p>
-        <div class="hero-info">
-        <h3>Mitsubishi Xpander 2024</h3>
-        <p>MPV terlaris dengan desain sporty, mesin MIVEC bertenaga, dan kabin lega untuk keluarga aktif Anda.</p>
-        <div class="hero-info">
-          <div class="hero-price"><i class="fa-solid fa-tag"></i> Mulai 298 Juta</div>
-          <a href="mobil.php" class="btn btn-primary btn-sm">Explore</a>
-        </div>
-
-        <?php } ?>
+        <?php if ($heroData): ?>
+          <?php 
+            $gambarHero = getGambarPath($heroData['gambar']);
+            $namaHero = sanitize($heroData['nama_mobil']);
+            $deskripsiHero = substr(sanitize($heroData['deskripsi']), 0, 100);
+            // Anda bisa tambahkan harga jika ada kolom harga, misal $heroData['harga']
+            $hargaHero = isset($heroData['harga']) ? number_format($heroData['harga'], 0, ',', '.') : 'Hubungi kami';
+          ?>
+          <img src="<?= $gambarHero ?>" alt="<?= $namaHero ?>" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22200%22><rect fill=%22%231f2937%22 width=%22600%22 height=%22200%22/><text x=%22200%22 y=%22110%22 font-size=%2220%22 fill=%22%239ca3af%22 font-family=%22Poppins%22>No Image</text></svg>'">
+          <h3><?= $namaHero ?></h3>
+          <p><?= $deskripsiHero ?>...</p>
+          <div class="hero-info">
+            <div class="hero-price"><i class="fa-solid fa-tag"></i> <?= $hargaHero ?></div>
+            <a href="mobil.php" class="btn btn-primary btn-sm">Lihat Detail</a>
+          </div>
+        <?php else: ?>
+          <img src="https://storage.googleapis.com/gcmkscsp001/public/media-assets/483f91da-09c5-4fc8-9e8f-6de540f6949d/conversions/26my-xp-exterior-front-left-rhd-u33-f-optimized-optimized.webp?GoogleAccessId=bsidevops%40gp-prod-mmksi-web-01.iam.gserviceaccount.com&Expires=1782809183&Signature=FHLJ1boFzVUW5HrLZk1%2Fnr7gG7gcfhApECnlNMdRFo%2FhcQNyQjkifpZgMoo3x6MZKZbqWUN0ZCWt%2BCUj5VURcEp1YX%2BFHNmeYeGc6l1sTlc0YtYcrPqkkBnTYh2GOJ4ITOJ6N6whGFUtoHMJwkdTUOhrc%2B0GHuRrLz25P%2BEtUO43XZLWF30TRikSK6W6ZeHMQQeh6xHu9eT4MOODRV%2FmrmGuCTvt0zSsDUWv1%2Fapki3VuynTDriQpEYCJRFKZhSiBE%2FBs3RXUIMCxFeb%2BMhU44dVc2GAtRHbQpx0xY1GaHttSn%2FLtO%2FPgy4fSOwcwtQ2a%2BuCIoQTSrpF7NQBcSSP0A%3D%3D" alt="Mitsubishi Xpander">
+          <h3>Mitsubishi Xpander 2024</h3>
+          <p>MPV terlaris dengan desain sporty, mesin MIVEC bertenaga, dan kabin lega untuk keluarga aktif Anda.</p>
+          <div class="hero-info">
+            <div class="hero-price"><i class="fa-solid fa-tag"></i> Mulai 298 Juta</div>
+            <a href="mobil.php" class="btn btn-primary btn-sm">Explore</a>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
@@ -168,7 +219,29 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
       <p>Pilihan kendaraan Mitsubishi berkualitas terbaik dengan harga bersaing, performa maksimal, dan kondisi prima siap pakai.</p>
     </div>
     <div class="grid-auto">
-
+      <?php if ($featured && $featured->num_rows > 0): ?>
+        <?php while ($row = $featured->fetch_assoc()): ?>
+          <?php 
+            $gambar = getGambarPath($row['gambar']);
+            $nama = sanitize($row['nama_mobil']);
+            $deskripsi = substr(sanitize($row['deskripsi']), 0, 80);
+            $harga = isset($row['harga']) ? 'Rp ' . number_format($row['harga'], 0, ',', '.') : 'Hubungi kami';
+          ?>
+          <div class="mobil-card animate-on-scroll">
+            <img src="<?= $gambar ?>" alt="<?= $nama ?>" onerror="this.src='assets/images/default-car.jpg'">
+            <div class="mobil-body">
+              <h3><?= $nama ?></h3>
+              <p><?= $deskripsi ?>...</p>
+              <div class="mobil-footer">
+                <span class="mobil-price"><?= $harga ?></span>
+                <a href="mobil.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Detail</a>
+              </div>
+            </div>
+          </div>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <p style="text-align:center; grid-column:1/-1; color:var(--gray);">Belum ada mobil featured saat ini.</p>
+      <?php endif; ?>
     </div>
     <div class="view-all-wrap animate-on-scroll">
       <a href="mobil.php" class="btn btn-primary btn-lg"><i class="fa-solid fa-car-side"></i> Lihat Semua Koleksi</a>
@@ -230,18 +303,24 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
       <p>Ribuan pelanggan puas telah mempercayakan kebutuhan Mitsubishinya kepada kami.</p>
     </div>
     <div class="testimonial-grid">
-
-        <div class="testimonial-author">
-          <div class="author-avatar"><?= strtoupper(substr($t['nama'], 0, 1)) ?></div>
-          <div class="author-info">
-            <h4><?= sanitize($t['nama']) ?></h4>
-<<<<<<< HEAD
-            <span><i class="fa-solid fa-location-dot"></i> <?= sanitize($t['kota']) ?></span>
+      <?php foreach ($testimonials as $t): ?>
+        <div class="testimonial-card animate-on-scroll">
+          <div class="quote-icon"><i class="fa-solid fa-quote-right"></i></div>
+          <div class="stars">
+            <?php for ($i=0; $i<5; $i++): ?>
+              <i class="fa-<?= $i < $t['rating'] ? 'solid' : 'regular' ?> fa-star"></i>
+            <?php endfor; ?>
+          </div>
+          <p>"<?= sanitize($t['isi']) ?>"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar"><?= strtoupper(substr($t['nama'], 0, 1)) ?></div>
+            <div class="author-info">
+              <h4><?= sanitize($t['nama']) ?></h4>
+              <span><i class="fa-solid fa-location-dot"></i> <?= sanitize($t['kota']) ?></span>
+            </div>
           </div>
         </div>
-      </div>
-      <?php endwhile; ?>
-
+      <?php endforeach; ?>
     </div>
   </div>
 </section>
@@ -263,7 +342,7 @@ $featured = $conn->query("SELECT * FROM mobil WHERE featured = 1 AND status = 'a
 <?php include 'includes/footer.php'; ?>
 <script src="assets/js/main.js"></script>
 <script>
-// Counter animation
+// Counter animation (sama seperti sebelumnya)
 document.addEventListener('DOMContentLoaded', function() {
     const counters = document.querySelectorAll('.counter');
     const speed = 200;
@@ -283,7 +362,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
         
-        // Start counter when visible
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -298,4 +376,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
